@@ -1,8 +1,9 @@
 <?php
 
-function objToHtml($obj, $indent)
+function objToHtml($obj, $indent, $supress)
 {
-    $html =  str_repeat(' ', $indent) . '{<br>';
+    $html = $supress ? '' : str_repeat(' ', $indent);
+    $html .= '{<br>';
     foreach(get_object_vars($obj) as $key => $value) {
         $html .= keyToHtml($key, $indent + 4);
         $html .= valueToHtml($value, $indent, true);
@@ -21,15 +22,15 @@ function keyToHtml($key, $indent)
 function valueToHtml($value, $indent, $supress)
 {
     if (is_object($value)) {
-        return objToHtml($value, $indent + 4);
+        return objToHtml($value, $indent + 4, $supress);
     }
     if (is_string($value)) {
-        $html = $supress ? '' : str_repeat(' ', $indent);
+        $html = $supress ? '' : str_repeat(' ', $indent + 4);
         $html .= '<span class="json-string">"' . $value .'"</span>';
         return $html;
     }
     if (is_numeric($value)) {
-        $html = $supress ? '' : str_repeat(' ', $indent);
+        $html = $supress ? '' : str_repeat(' ', $indent + 4);
         $html .= '<span class="json-numeric">' . $value .'</span>';
         return $html;
     }
@@ -40,7 +41,7 @@ function valueToHtml($value, $indent, $supress)
             $html .= ',<br>';
         }
         $html = substr($html, 0, -5);
-        $html .= '<br>' . str_repeat(' ', $indent) . ']';
+        $html .= '<br>' . str_repeat(' ', $indent + 4) . ']';
         return $html;
     }
     return ''; // should never happen
@@ -49,9 +50,10 @@ function valueToHtml($value, $indent, $supress)
 $json = file_get_contents('example.json');
 $obj = json_decode($json);
 $html = '<pre>';
-$html .= objToHtml($obj, 0);
+$html .= objToHtml($obj, 0, false);
 $html .= '</pre>';
 
 include 'template.phtml';
 
+echo $debug;
 
